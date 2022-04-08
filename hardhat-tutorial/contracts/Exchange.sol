@@ -154,7 +154,7 @@ contract Exchange is ERC20 {
         uint256 ethBought = getAmountOfToken(_tokenSold, tokenReserve, address(this).balance);
         require(ethBought >= _minEth, "insufficient output amount");
         // Transfer `Crypto Dev` tokens from the user's address to the contract
-        ERC20(cryptoDevTokenAddress).transferFrom(msg.sender, address(this).balance, _tokenSold);
+        ERC20(cryptoDevTokenAddress).transferFrom(msg.sender, address(this), _tokenSold);
         // send the `ethBought` to the user from the contract
         payable(msg.sender).transfer(ethBought);
     }
