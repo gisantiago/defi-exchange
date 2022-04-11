@@ -72,8 +72,8 @@ export default function Home() {
    */
   const getAmounts = async () => {
     try {
-      const provider = await getProvideOrSigner(false);
-      const signer = await getProvideOrSigner(true);
+      const provider = await getProviderOrSigner(false);
+      const signer = await getProviderOrSigner(true);
       const address = await signer.getAddress();
       // get the amount of eth in the user's account
       const _ethBalance = await getEtherBalance(provider, address);
@@ -109,7 +109,7 @@ export default function Home() {
       // Check if the user entered zero
       // We are here using the `eq` method from BigNumber class in `ethers.js`
       if (!swapAmountWei.eq(zero)) {
-        const signer = await getProvideOrSigner(true);
+        const signer = await getProviderOrSigner(true);
         setLoading(true);
         // Call the swapTokens function from the `utils` folder
         await swapTokens(
@@ -180,7 +180,7 @@ export default function Home() {
       const addEtherWei = utils.parseEther(addEther.toString());
       // Check if the values are zero
       if (!addCDTokens.eq(zero) && !addEtherWei.eq(zero)) {
-        const signer = await getProvideOrSigner(true);
+        const signer = await getProviderOrSigner(true);
         setLoading(true);
         // call the addLiquidity function from the utils folder
         await addLiquidity(signer, addCDTokens, addEtherWei);
@@ -210,7 +210,7 @@ export default function Home() {
 
   const _removeLiquidity = async () => {
     try {
-      const signer = await getProvideOrSigner(ture);
+      const signer = await getProviderOrSigner(ture);
       // Convert the LP tokens entered by the user to a BigNumber
       const removeLPTokensWei = utils.parseEther(removeLPTokens);
       setLoading(true);
@@ -267,7 +267,7 @@ export default function Home() {
     try {
       // Get the provider from web3Modal, which in our case is MetaMask
       // When used for the first time, it prompts the user to connect their wallet
-      await getProvideOrSigner();
+      await getProviderOrSigner();
       setWalletConnected(true);
     } catch (error) {
       console.error(error);
@@ -287,7 +287,7 @@ export default function Home() {
    * @param {*} needSigner - True if you need the signer, default false otherwise
    */
 
-  const getProvideOrSigner = async (needSigner = false) => {
+  const getProviderOrSigner = async (needSigner = false) => {
     // Connect to Metamask
     // Since we store `web3Modal` as a reference, we need to access the `current` value to get access to the underlying object
     const provider = await web3ModalRef.current.connect();
