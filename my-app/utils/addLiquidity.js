@@ -1,10 +1,10 @@
-import { Contract, utils } from 'ethers';
+import { Contract, utils } from "ethers";
 import {
   EXCHANGE_CONTRACT_ABI,
   EXCHANGE_CONTRACT_ADDRESS,
   TOKEN_CONTRACT_ABI,
   TOKEN_CONTRACT_ADDRESS,
-} from '../constants';
+} from "../constants";
 
 /**
  * addLiquidity helps add liquidity to the exchange,
@@ -13,9 +13,13 @@ import {
  * then we calculate the crypto dev tokens he can add, given the eth he wants to add by keeping the ratios
  * constant
  */
-
-export const addLiquidity = async (signer, addCDAmountWei, addEthAmountWei) => {
+export const addLiquidity = async (
+  signer,
+  addCDAmountWei,
+  addEtherAmountWei
+) => {
   try {
+    // create a new instance of the token contract
     const tokenContract = new Contract(
       TOKEN_CONTRACT_ADDRESS,
       TOKEN_CONTRACT_ABI,
@@ -36,11 +40,11 @@ export const addLiquidity = async (signer, addCDAmountWei, addEthAmountWei) => {
     await tx.wait();
     // After the contract has the approval, add the ether and cd tokens in the liquidity
     tx = await exchangeContract.addLiquidity(addCDAmountWei, {
-      value: addEthAmountWei,
+      value: addEtherAmountWei,
     });
     await tx.wait();
-  } catch (error) {
-    console.error(error);
+  } catch (err) {
+    console.error(err);
   }
 };
 
@@ -48,9 +52,8 @@ export const addLiquidity = async (signer, addCDAmountWei, addEthAmountWei) => {
  * calculateCD calculates the CD tokens that need to be added to the liquidity
  * given `_addEtherAmountWei` amount of ether
  */
-
 export const calculateCD = async (
-  _addEther = '0',
+  _addEther = "0",
   etherBalanceContract,
   cdTokenReserve
 ) => {

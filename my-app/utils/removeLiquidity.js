@@ -1,59 +1,97 @@
-import { Contract, providers, utils, BigNumber } from 'ethers';
-import { EXCHANGE_CONTRACT_ABI, EXCHANGE_CONTRACT_ADDRESS } from '../constants';
+import { Contract } from "ethers";
+import {
+  EXCHANGE_CONTRACT_ABI,
+  EXCHANGE_CONTRACT_ADDRESS,
+  TOKEN_CONTRACT_ABI,
+  TOKEN_CONTRACT_ADDRESS,
+} from "../constants";
 
-/**
- * removeLiquidity: Removes the `removeLPTokensWei` amount of LP tokens from
- * liquidity and also the calculated amount of `ether` and `CD` tokens
- */
+/*
+    getAmountOfTokensReceivedFromSwap:  Returns the number of Eth/Crypto Dev tokens that can be recieved 
+    when the user swaps `_swapAmountWEI` amount of Eth/Crypto Dev tokens.
+*/
+export const getAmountOfTokensReceivedFromSwap = async (
+  _swapAmountWei,
+  provider,
+  ethSelected,
+  ethBalance,
+  reservedCD
+) => {
+  // Create a new instance of the exchange contract
+  const exchangeContract = new Contract(
+    EXCHANGE_CONTRACT_ADDRESS,
+    EXCHANGE_CONTRACT_ABI,
+    provider
+  );
+  let amountOfTokens;
+  // If ETH is selected this means our input value is `Eth` which means our input amount would be
+  // `_swapAmountWei`, the input reserve would be the `ethBalance` of the contract and output reserve
+  // would be the  `Crypto Dev token` reserve
+  if (ethSelected) {
+    amountOfTokens = await exchangeContract.getAmountOfTokens(
+      _swapAmountWei,
+      ethBalance,
+      reservedCD
+    );
+  } else {
+    // If ETH is not selected this means our input value is `Crypto Dev` tokens which means our input amount would be
+    // `_swapAmountWei`, the input reserve would be the `Crypto Dev token` reserve of the contract and output reserve
+    // would be the `ethBalance`
+    amountOfTokens = await exchangeContract.getAmountOfTokens(
+      _swapAmountWei,
+      reservedCD,
+      ethBalance
+    );
+  }
 
-export const removeLiquidity = async (signer, removeLPTokenWei) => {
+  return amountOfTokens;
+};
+
+/*
+  swapTokens: Swaps  `swapAmountWei` of Eth/Crypto Dev tokens with `tokenToBeRecievedAfterSwap` amount of Eth/Crypto Dev tokens.
+*/
+export const swapTokens = async (
+  signer,
+  swapAmountWei,
+  tokenToBeRecievedAfterSwap,
+  ethSelected
+) => {
   // Create a new instance of the exchange contract
   const exchangeContract = new Contract(
     EXCHANGE_CONTRACT_ADDRESS,
     EXCHANGE_CONTRACT_ABI,
     signer
   );
-  const tx = await exchangeContract.removeLiquidity(removeLPTokenWei);
-  await tx.wait();
-};
-
-/**
- * getTokensAfterRemove: Calculates the amount of `Ether` and `CD` tokens
- * that would be returned back to user after he removes `removeLPTokenWei` amount
- * of LP tokens from the contract
- */
-
-export const getTokensAfterRemove = async (
-  provider,
-  removeLPTokenWei,
-  _ethBalance,
-  cryptoDevTokenReserve
-) => {
-  try {
-    const exchangeContract = new Contract(
-      EXCHANGE_CONTRACT_ADDRESS,
-      EXCHANGE_CONTRACT_ABI,
-      provider
+  const tokenContract = new Contract(
+    TOKEN_CONTRACT_ADDRESS,
+    TOKEN_CONTRACT_ABI,
+    signer
+  );
+  let tx;
+  // If Eth is selected call the `ethToCryptoDevToken` function else
+  // call the `cryptoDevTokenToEth` function from the contract
+  // As you can see you need to pass the `swapAmount` as a value to the function because
+  // It is the ether we are paying to the contract, instead of a value we are passing to the function
+  if (ethSelected) {
+    tx = await exchangeContract.ethToCryptoDevToken(
+      tokenToBeRecievedAfterSwap,
+      {
+        value: swapAmountWei,
+      }
     );
-    // Get the total supply of `Crypto Dev` LP tokens
-    const _totalSupply = await exchangeContract.totalSupply();
-    // Here we are using the Bignumber methods of multiplication and division
-    // The amount of ether that would be sent back to the user after he withdraws the LP token
-    // id calculated based on a ratio,
-    // Ratio is -> (amount of ether that would be sent back to the user/ Eth reserves) = (LP tokens withdrawn)/(Total supply of LP tokens)
-    // By some maths we get -> (amount of ether that would be sent back to the user) = (Eth Reserve * LP tokens withdrawn)/(Total supply of LP tokens)
-    // Similariy we also maintain a ratio for the `CD` tokens, so here in our case
-    // Ratio is -> (amount of CD tokens sent back to the user/ CD Token reserve) = (LP tokens withdrawn)/(Total supply of LP tokens)
-    // Then (amount of CD tokens sent back to the user) = (CD token reserve * LP tokens withdrawn)/(Total supply of LP tokens)
-    const _removeEther = _ethBalance.mul(removeLPTokenWei).div(_totalSupply);
-    const _removeCD = cryptoDevTokenReserve
-      .mul(removeLPTokenWei)
-      .div(_totalSupply);
-    return {
-      _removeEther,
-      _removeCD,
-    };
-  } catch (error) {
-    console.error(error);
+  } else {
+    // User has to approve `swapAmountWei` for the contract because `Crypto Dev Token`
+    // is an ERC20
+    tx = await tokenContract.approve(
+      EXCHANGE_CONTRACT_ADDRESS,
+      swapAmountWei.toString()
+    );
+    await tx.wait();
+    // call cryptoDebTokenToEth function which would take in `swapAmounWei` of crypto dev tokens and would send back `tokenToBeRecievedAfterSwap` amount of ether to the user
+    tx = await exchangeContract.cryptoDevTokenToEth(
+      swapAmountWei,
+      tokenToBeRecievedAfterSwap
+    );
   }
+  await tx.wait();
 };
