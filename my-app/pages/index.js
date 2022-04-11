@@ -236,7 +236,7 @@ export default function Home() {
 
   const _getTokensAfterRemove = async (_removeLPTokens) => {
     try {
-      const provider = await getProvideOrSigner();
+      const provider = await getProviderOrSigner();
       // Convert the LP tokens entered by the user to a BigNumber
       const removeLPTokensWei = await utils.parseEther(_removeLPTokens);
       // Get the Eth reserves within the exchange contract
