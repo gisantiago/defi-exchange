@@ -52,7 +52,7 @@ export const getAmountOfTokensReceivedFromSwap = async (
   swapTokens: Swaps  `swapAmountWei` of Eth/Crypto Dev tokens with `tokenToBeRecievedAfterSwap` amount of Eth/Crypto Dev tokens.
 */
 
-export const sawpTokens = async (
+export const swapTokens = async (
   signer,
   _swapAmountWei,
   tokenToBeRecievedAfterSwap,
