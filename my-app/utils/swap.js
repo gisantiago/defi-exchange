@@ -1,23 +1,21 @@
-import { isCommunityResourcable } from '@ethersproject/providers';
-import { Contract } from 'ethers';
+import { Contract } from "ethers";
 import {
   EXCHANGE_CONTRACT_ABI,
   EXCHANGE_CONTRACT_ADDRESS,
   TOKEN_CONTRACT_ABI,
   TOKEN_CONTRACT_ADDRESS,
-} from '../constants/index';
+} from "../constants";
 
 /*
     getAmountOfTokensReceivedFromSwap:  Returns the number of Eth/Crypto Dev tokens that can be recieved 
     when the user swaps `_swapAmountWEI` amount of Eth/Crypto Dev tokens.
 */
-
 export const getAmountOfTokensReceivedFromSwap = async (
   _swapAmountWei,
   provider,
   ethSelected,
   ethBalance,
-  reserveCD
+  reservedCD
 ) => {
   // Create a new instance of the exchange contract
   const exchangeContract = new Contract(
@@ -33,7 +31,7 @@ export const getAmountOfTokensReceivedFromSwap = async (
     amountOfTokens = await exchangeContract.getAmountOfTokens(
       _swapAmountWei,
       ethBalance,
-      reserveCD
+      reservedCD
     );
   } else {
     // If ETH is not selected this means our input value is `Crypto Dev` tokens which means our input amount would be
@@ -41,20 +39,20 @@ export const getAmountOfTokensReceivedFromSwap = async (
     // would be the `ethBalance`
     amountOfTokens = await exchangeContract.getAmountOfTokens(
       _swapAmountWei,
-      reserveCD,
+      reservedCD,
       ethBalance
     );
   }
+
   return amountOfTokens;
 };
 
 /*
   swapTokens: Swaps  `swapAmountWei` of Eth/Crypto Dev tokens with `tokenToBeRecievedAfterSwap` amount of Eth/Crypto Dev tokens.
 */
-
 export const swapTokens = async (
   signer,
-  _swapAmountWei,
+  swapAmountWei,
   tokenToBeRecievedAfterSwap,
   ethSelected
 ) => {

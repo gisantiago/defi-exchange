@@ -1,15 +1,14 @@
-import { Contract, contract } from 'ethers';
+import { Contract } from "ethers";
 import {
   EXCHANGE_CONTRACT_ABI,
   EXCHANGE_CONTRACT_ADDRESS,
   TOKEN_CONTRACT_ABI,
   TOKEN_CONTRACT_ADDRESS,
-} from '../constants';
+} from "../constants";
 
 /**
  * getEtherBalance: Retrieves the ether balance of the user or the contract
  */
-
 export const getEtherBalance = async (provider, address, contract = false) => {
   try {
     // If the caller has set the `contract` boolean to true, retrieve the balance of
@@ -20,9 +19,10 @@ export const getEtherBalance = async (provider, address, contract = false) => {
       return balance;
     } else {
       const balance = await provider.getBalance(address);
+      return balance;
     }
-  } catch (error) {
-    console.error(error);
+  } catch (err) {
+    console.error(err);
     return 0;
   }
 };
@@ -40,8 +40,8 @@ export const getCDTokensBalance = async (provider, address) => {
     );
     const balanceOfCryptoDevTokens = await tokenContract.balanceOf(address);
     return balanceOfCryptoDevTokens;
-  } catch (error) {
-    console.error(error);
+  } catch (err) {
+    console.error(err);
   }
 };
 
@@ -49,7 +49,6 @@ export const getCDTokensBalance = async (provider, address) => {
  * getLPTokensBalance: Retrieves the amount of LP tokens in the account
  * of the provided `address`
  */
-
 export const getLPTokensBalance = async (provider, address) => {
   try {
     const exchangeContract = new Contract(
@@ -59,8 +58,8 @@ export const getLPTokensBalance = async (provider, address) => {
     );
     const balanceOfLPTokens = await exchangeContract.balanceOf(address);
     return balanceOfLPTokens;
-  } catch (error) {
-    console.error(error);
+  } catch (err) {
+    console.error(err);
   }
 };
 
@@ -77,7 +76,7 @@ export const getReserveOfCDTokens = async (provider) => {
     );
     const reserve = await exchangeContract.getReserve();
     return reserve;
-  } catch (error) {
-    console.error(error);
+  } catch (err) {
+    console.error(err);
   }
 };
