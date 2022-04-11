@@ -5,7 +5,7 @@ import {
   EXCHANGE_CONTRACT_ADDRESS,
   TOKEN_CONTRACT_ABI,
   TOKEN_CONTRACT_ADDRESS,
-} from '../constants';
+} from '../constants/index';
 
 /*
     getAmountOfTokensReceivedFromSwap:  Returns the number of Eth/Crypto Dev tokens that can be recieved 
